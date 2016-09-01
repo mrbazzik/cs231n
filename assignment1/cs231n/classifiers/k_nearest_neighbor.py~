@@ -183,7 +183,7 @@ class KNearestNeighbor(object):
             
       
       y_pred[i] = maxl
-      #print "%s - %s" %(str(closest_y), y_pred[i])
+      print "%s - %s" %(str(closest_y), y_pred[i])
       #########################################################################
       #                           END OF YOUR CODE                            # 
       #########################################################################
