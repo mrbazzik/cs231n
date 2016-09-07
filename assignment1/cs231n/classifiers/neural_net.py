@@ -110,12 +110,26 @@ class TwoLayerNet(object):
     grads = {}
     #ds = -1.0/(X.shape[0]*correct_scores_loss)
 
-    mask = np.repeat(np.reshape(correct_scores_loss, (-1,1)), W2.shape[1], axis = 1)
+    mask = scores_loss#np.repeat(np.reshape(correct_scores_loss, (-1,1)), W2.shape[1], axis = 1)
     mask[xrange(mask.shape[0]), y] = correct_scores_loss - 1
-    dW2 = a1.T.dot(mask)/a1.shape[0] + reg*W2    
+    dW2 = a1.T.dot(mask)/X.shape[0] + reg*W2   
+    db2 = np.sum(mask, axis=0)/X.shape[0]
 
-    da1 = np.sum(W2.dot(mask.T), axis=1)
+    diffW2 = np.array(W2)
+    diffW2[
+    da1 = W2.dot(mask.T)
+    da1dz1 = X.dot(W1)+b1
+    da1dz1[da1dz1<0] = 0
+#    da1dz1 = np.sum(da1dz1, axis=1)
+    #da1dw1 = X.T.dot(da1dz1)
+    #dW1 = da1*da1dw1/X.shape[0] + reg*W1
+    dW1=0
+    db1 = np.sum(da1.T*da1dz1, axis=0)/X.shape[0]
 
+    grads['W1'] = dW1
+    grads['W2'] = dW2
+    grads['b1'] = db1
+    grads['b2'] = db2
     
     #############################################################################
     # TODO: Compute the backward pass, computing the derivatives of the weights #
