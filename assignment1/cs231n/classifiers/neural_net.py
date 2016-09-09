@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import copy
 
 class TwoLayerNet(object):
   """
@@ -197,21 +197,29 @@ class TwoLayerNet(object):
       # Compute loss and gradients using the current minibatch
       loss, grads = self.loss(X_batch, y=y_batch, reg=reg)
       loss_history.append(loss)
-
+      #print "loss: %f, it: %f" %(loss, it)
       #########################################################################
       # TODO: Use the gradients in the grads dictionary to update the         #
       # parameters of the network (stored in the dictionary self.params)      #
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
+      before = copy.deepcopy(self.params)
+      #print self.params['b2']
       for grad_name in grads:
          self.params[grad_name] -= learning_rate*grads[grad_name]
       pass
+      #print self.params['b2']
+      #print before['b2']
+      #print 'diff b1: %f' %(np.sum(np.abs(before['b1']-self.params['b1'])))
+      #print 'diff b2: %f' %(np.sum(np.abs(before['b2']-self.params['b2'])))
+      #print 'diff W1: %f' %(np.sum(np.abs(before['W1']-self.params['W1'])))
+      #print 'diff W2: %f' %(np.sum(np.abs(before['W2']-self.params['W2'])))
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
 
-      if verbose and it % 100 == 0:
+      if verbose and it % 10 == 0:
         print 'iteration %d / %d: loss %f' % (it, num_iters, loss)
 
       # Every epoch, check train and val accuracy and decay learning rate.
@@ -219,6 +227,7 @@ class TwoLayerNet(object):
         # Check accuracy
         train_acc = (self.predict(X_batch) == y_batch).mean()
         val_acc = (self.predict(X_val) == y_val).mean()
+        #print 'train_acc: %f, val_acc: %f' %(train_acc, val_acc)
         train_acc_history.append(train_acc)
         val_acc_history.append(val_acc)
 
