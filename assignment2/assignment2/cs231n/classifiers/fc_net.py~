@@ -95,7 +95,7 @@ class TwoLayerNet(object):
     
     loss, grads = 0, {}
     loss, dscores = softmax_loss(scores, y)
-    loss += 0.5*self.reg*(np.sum(W1*W1)+np.sum(W2*W2))
+    loss += 0.5*reg*(np.sum(W1*W1)+np.sum(W2*W2))
     da1, dW2, db2 = affine_backward(dscores, z2_cache)
     dW2 += self.reg*W2
     dz1 = relu_backward(da1, a1_cache)
