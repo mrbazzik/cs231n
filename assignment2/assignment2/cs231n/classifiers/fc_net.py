@@ -183,6 +183,13 @@ class FullyConnectedNet(object):
     # parameters should be initialized to zero.                                #
     ############################################################################
     pass
+    prev_dim = input_dim
+    layers_dims = list(hidden_dims)+[num_classes]
+    for it in xrange(len(layers_dims)):
+      cur_dim = layers_dims[it]
+      self.params['W%s'%(it+1)] = np.random.randn(prev_dim, cur_dim)*weight_scale
+      self.params['b%s'%(it+1)] = np.zeros(cur_dim)
+      prev_dim = cur_dim
     ############################################################################
     #                             END OF YOUR CODE                             #
     ############################################################################
@@ -240,6 +247,17 @@ class FullyConnectedNet(object):
     # self.bn_params[1] to the forward pass for the second batch normalization #
     # layer, etc.                                                              #
     ############################################################################
+
+    caches_affine = np.zeros(self.num_layers)
+    caches_activ = np.zeros(self.num_layers-1)
+    
+    cur_a = X
+    for it in xrange(self.num_layers-1):
+      weights = self.params['W%s'%(it+1)]
+      biases = self.params['b%s'%(it+1)]
+      z, caches_affine[it] = affine_forward(cur_a, weights, biases)
+      cur_a, caches_activ[it] = relu_forward(z)
+    scores, caches_affine[self.num_layers-1] = affine_forward(cur_a, sel.params['W%s'%(self.num_layers)], sel.params['b%s'%(self.num_layers)])  
     pass
     ############################################################################
     #                             END OF YOUR CODE                             #
@@ -263,6 +281,20 @@ class FullyConnectedNet(object):
     # automated tests, make sure that your L2 regularization includes a factor #
     # of 0.5 to simplify the expression for the gradient.                      #
     ############################################################################
+    loss, dscores = softmax_loss(scores, y)
+    dz = dscores
+    for it in xrange(self.num_layers,0,-1):
+      w_name = 'W%s'%(it+1)
+      b_name = 'b%s'%(it+1)
+      weights = self.params[w_name]
+      biases = self.params[b_name]
+      da, dW, db = affine_backward(dz, caches_affine[it+1])
+      dW += self.reg*weights
+      grads[w_name] = dW
+      grads[b_name] = db
+      loss += 0.5*self.reg*np.sum(weights*weights)
+      dz = relu_backward(da, caches_activ[it+1])
+
     pass
     ############################################################################
     #                             END OF YOUR CODE                             #
