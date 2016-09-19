@@ -248,8 +248,8 @@ class FullyConnectedNet(object):
     # layer, etc.                                                              #
     ############################################################################
 
-    caches_affine = np.zeros(self.num_layers)
-    caches_activ = np.zeros(self.num_layers-1)
+    caches_affine = [0]*self.num_layers
+    caches_activ = [0]*(self.num_layers-1)
     
     cur_a = X
     for it in xrange(self.num_layers-1):
@@ -257,7 +257,7 @@ class FullyConnectedNet(object):
       biases = self.params['b%s'%(it+1)]
       z, caches_affine[it] = affine_forward(cur_a, weights, biases)
       cur_a, caches_activ[it] = relu_forward(z)
-    scores, caches_affine[self.num_layers-1] = affine_forward(cur_a, sel.params['W%s'%(self.num_layers)], sel.params['b%s'%(self.num_layers)])  
+    scores, caches_affine[self.num_layers-1] = affine_forward(cur_a, self.params['W%s'%(self.num_layers)], self.params['b%s'%(self.num_layers)])  
     pass
     ############################################################################
     #                             END OF YOUR CODE                             #
@@ -283,17 +283,22 @@ class FullyConnectedNet(object):
     ############################################################################
     loss, dscores = softmax_loss(scores, y)
     dz = dscores
+    first = True
     for it in xrange(self.num_layers,0,-1):
-      w_name = 'W%s'%(it+1)
-      b_name = 'b%s'%(it+1)
+      w_name = 'W%s'%(it)
+      b_name = 'b%s'%(it)
       weights = self.params[w_name]
       biases = self.params[b_name]
-      da, dW, db = affine_backward(dz, caches_affine[it+1])
+
+      if not first:
+        dz = relu_backward(da, caches_activ[it-1])      
+      else: first = False
+      da, dW, db = affine_backward(dz, caches_affine[it-1])
       dW += self.reg*weights
       grads[w_name] = dW
       grads[b_name] = db
       loss += 0.5*self.reg*np.sum(weights*weights)
-      dz = relu_backward(da, caches_activ[it+1])
+
 
     pass
     ############################################################################

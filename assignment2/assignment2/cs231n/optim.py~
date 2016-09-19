@@ -147,7 +147,7 @@ def adam(x, dx, config=None):
   #############################################################################
   beta1 = config['beta1']
   beta2 = config['beta2']
-  t = config['t']+1
+  t = config['t']
   v = (1-beta2)*dx*dx + beta2*config.get('v')
   m = (1-beta1)*dx + beta1*config.get('m')
   mc = m/(1-np.power(beta1, t))
@@ -155,7 +155,7 @@ def adam(x, dx, config=None):
   next_x = x - config['learning_rate']/np.sqrt(vc+config['epsilon'])*mc
   config['m'] = m
   config['v'] = v
-  config['t'] = t
+  config['t'] = t+1
   pass
   #############################################################################
   #                             END OF YOUR CODE                              #
