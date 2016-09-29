@@ -105,6 +105,8 @@ def relu_backward(dout, cache):
   #############################################################################
   # TODO: Implement the ReLU backward pass.                                   #
   #############################################################################
+  dx = dout
+  dx[x<0] = 0
   pass
   #############################################################################
   #                             END OF YOUR CODE                              #
@@ -173,6 +175,17 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # the momentum variable to update the running mean and running variance,    #
     # storing your result in the running_mean and running_var variables.        #
     #############################################################################
+    means = np.mean(x, axis = 0, keepdims = True)
+    stds = np.std(x, axis = 0, keepdims = True)
+    out = (x - means)/(stds+eps)*gamma + beta
+    cache = bn_param
+    running_mean = momentum*running_mean + (1-momentum)*means
+    running_var = momentum*running_var + (1-momentum)*stds
+    cache['means'] = means
+    cache['stds'] = stds
+    cache['gamma'] = gamma
+    cache['beta'] = beta
+    cache['x'] = x
     pass
     #############################################################################
     #                             END OF YOUR CODE                              #
@@ -184,6 +197,7 @@ def batchnorm_forward(x, gamma, beta, bn_param):
     # and shift the normalized data using gamma and beta. Store the result in   #
     # the out variable.                                                         #
     #############################################################################
+    out = (x - running_mean)/(running_var + eps)*gamma + beta
     pass
     #############################################################################
     #                             END OF YOUR CODE                              #
@@ -220,6 +234,28 @@ def batchnorm_backward(dout, cache):
   # TODO: Implement the backward pass for batch normalization. Store the      #
   # results in the dx, dgamma, and dbeta variables.                           #
   #############################################################################
+
+ #f = norm_x*gamma + beta
+  stds = cache['stds']
+  means = cache['means']
+  gamma = cache['gamma']
+  beta = cache['beta']
+  x = cache['x']
+
+  N,D = x.shape
+  dbeta = np.sum(dout, axis=0)
+  print dbeta
+  norm_x = (x-means)/stds
+  dgamma = np.sum(dout*norm_x, axis=0)
+  
+  diff = x - means
+  st = 1/stds
+  dnorm_x = dout*gamma
+# norm_x = diff*st
+  ddiff = dnorm_x*(st + diff*(-0.5*np.power(stds, -3)*2/N*diff))
+  dx = (1-1/N)*ddiff
+  
+  
   pass
   #############################################################################
   #                             END OF YOUR CODE                              #
