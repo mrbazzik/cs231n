@@ -251,8 +251,40 @@ def batchnorm_backward(dout, cache):
   st = 1/stds
   dnorm_x = dout*gamma
 # norm_x = diff*st
-  ddiff = dnorm_x*(st + diff*(-0.5*np.power(stds, -3)*2/N*diff))
-  dx = (1-1/N)*ddiff
+  #ddiff = dnorm_x*(st + diff*(-0.5*np.power(stds, -3)*2/N*diff))
+  #dx = (1-1/N)*ddiff
+
+  s = means
+  sigma = stds
+  f = (x - s)/sigma
+  
+  dfdx = 1/sigma
+  dfds = -1/sigma
+  dfdsigma = np.sum(-(x-s)/sigma**2, axis=0, keepdims=True)
+
+  dsdx = 1/N
+  
+  
+  #sigma = m**0.5
+  #m = o/N
+  #o = sum(li)
+  #l=v**2
+  #v = x-s
+
+  #dsigmadm = 0.5*m**(-0.5)
+  #dmdo = 1/N
+  #dodl = 1
+  #dldv = 2*v
+  #dvdx = 1-dsdx
+  #dvds = -1
+
+  dsigmads = (0.5*(np.sum((x-means)**2, axis=0, keepdims=True)/N)**(-0.5))*(1/N)*2*(x-s)*(-1)
+  dsigmadx = (0.5*(np.sum((x-means)**2, axis=0, keepdims=True)/N)**(-0.5))*(1/N)*2*(x-s)*(1-dsdx)
+  
+  dfds = dfdsigma*dsigmads + dfds
+  dfdx = dfds*dsdx + dfdsigma*dsigmadx + dfdx
+  dx = dnorm_x*dfdx
+  print dx
   
   
   pass
