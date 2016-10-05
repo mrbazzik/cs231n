@@ -249,7 +249,7 @@ def batchnorm_backward(dout, cache):
   
   diff = x - means
   st = 1/stds
-  dnorm_x = dout*gamma
+  dnorm_x = np.sum(dout*gamma, axis=1, keepdims = True)
 # norm_x = diff*st
   #ddiff = dnorm_x*(st + diff*(-0.5*np.power(stds, -3)*2/N*diff))
   #dx = (1-1/N)*ddiff
@@ -258,11 +258,11 @@ def batchnorm_backward(dout, cache):
   sigma = stds
   f = (x - s)/sigma
   
-  dfdx = 1/sigma
+  dfdx = np.sum(1/sigma)*np.ones((N,1))
   dfds = -1/sigma
   dfdsigma = np.sum(-(x-s)/sigma**2, axis=0, keepdims=True)
 
-  dsdx = 1/N
+  dsdx = 1/N*np.ones((N,1))
   
   
   #sigma = m**0.5
@@ -278,11 +278,11 @@ def batchnorm_backward(dout, cache):
   #dvdx = 1-dsdx
   #dvds = -1
 
-  dsigmads = (0.5*(np.sum((x-means)**2, axis=0, keepdims=True)/N)**(-0.5))*(1/N)*2*(x-s)*(-1)
-  dsigmadx = (0.5*(np.sum((x-means)**2, axis=0, keepdims=True)/N)**(-0.5))*(1/N)*2*(x-s)*(1-dsdx)
+  dsigmads = np.sum((0.5*(np.sum((x-means)**2, axis=0, keepdims=True)/N)**(-0.5))*(1/N)*2*(x-s)*(-1), axis=0, keepdims = True)
+  dsigmadx = np.sum((0.5*(np.sum((x-means)**2, axis=0, keepdims=True)/N)**(-0.5))*(1/N)*2*(x-s)*(1-dsdx), axis=1, keepdims=True)
   
   dfds = dfdsigma*dsigmads + dfds
-  dfdx = dfds*dsdx + dfdsigma*dsigmadx + dfdx
+  dfdx = np.sum(dsdx*dfds.reshape(1,-1) + dsigmadx.reshape(-1,1)*dfdsigma, axis=1, keepdims=True) + dfdx
   dx = dnorm_x*dfdx
   print dx
   
